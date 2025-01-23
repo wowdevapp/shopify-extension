@@ -1,0 +1,36 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f48bad1b6948bca8341d79115ff28000"
+application_url = "https://starter-hart-paths-roller.trycloudflare.com"
+embedded = true
+name = "training-app"
+handle = "training-app-32"
+
+[webhooks]
+api_version = "2025-01"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://starter-hart-paths-roller.trycloudflare.com/auth/callback",
+  "https://starter-hart-paths-roller.trycloudflare.com/auth/shopify/callback",
+  "https://starter-hart-paths-roller.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
+
+[build]
+dev_store_url = "uzely-testing.myshopify.com"
+automatically_update_urls_on_dev = true

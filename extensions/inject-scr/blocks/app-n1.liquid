@@ -1,0 +1,42 @@
+<script>
+  {% if template == 'index' %}
+    var cibleclic_em = [{ page: 'homepage', email: '{{customer.email}}', gdpr_consentstring: '{{ shop.subscription_policy }}' }];
+  {% elsif template == 'product' %}
+     var cibleclic_pt=[{page:'product',email: '{{customer.email}}', productid: '{{ product.id }}', price: '{{ product.price }}', product_name: '{{ product.title }}', product_image: '{{ product.images }}', product_description:'{{ product.description }}'}];
+  {% elsif template == 'collection' %}
+    var cibleclic_pt=[{
+      page: 'listing',
+      email: '{{customer.email}}',
+      categoryid: '{{collection.id}}',
+      univers: '{{collection.all_types}}',
+      item: [
+        {% assign top_products = collection.products | limit: 3 %}
+        {% for product in top_products %}
+          "{{ product.id }}"{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    }];
+
+  {% elsif template == 'cart' %}
+     var cibleclic_pt=[{page: 'basket',email: '{{customer.email}}',
+  listprices: '{{cart.original_total_price}}',
+  listquantity: '{{cart.item_count }}',
+  price: '{{cart.original_total_price}}',
+  listproducts:  [
+    {% assign items = cart.items %}
+    {% for item in items %}
+      "{{ item.id }}"{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]}];
+  {% elsif template == 'customers/login' %}
+    var cibleclic_pt=[{page: 'inscription'}];
+  {% endif %}
+</script>
+{% schema %}
+{
+  "name": "Page Variables",
+  "target": "body",
+  "javascript": "homepage.js",
+  "settings": []
+}
+{% endschema %}
