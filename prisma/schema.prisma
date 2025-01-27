@@ -42,3 +42,9 @@ model QRCode {
   scans            Int      @default(0)
   createdAt        DateTime @default(now())
 }
+
+model Settings {
+  id            Int    @id @default(autoincrement())
+  advertiser_id String
+  offer_id      String
+}

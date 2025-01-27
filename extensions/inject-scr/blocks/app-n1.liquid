@@ -19,8 +19,18 @@
 
   {% elsif template == 'cart' %}
      var cibleclic_pt=[{page: 'basket',email: '{{customer.email}}',
-  listprices: '{{cart.original_total_price}}',
-  listquantity: '{{cart.item_count }}',
+  listprices:  [
+    {% assign items = cart.items %}
+    {% for item in items %}
+      "{{ item.price }}"{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ],
+  listquantity: [
+    {% assign items = cart.items %}
+    {% for item in items %}
+      "{{ item.quantity }}"{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ],
   price: '{{cart.original_total_price}}',
   listproducts:  [
     {% assign items = cart.items %}
