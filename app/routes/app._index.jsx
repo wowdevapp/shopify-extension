@@ -27,7 +27,8 @@ export async function loader({ request, params }) {
 }
 
 export async function action({ request ,params}) {
-  const { session } = await authenticate.admin(request);
+  const { session ,admin } = await authenticate.admin(request);
+
   const shop = session.shop;
 
   /** @type {any} */
@@ -38,14 +39,47 @@ export async function action({ request ,params}) {
   if (errors) {
     return json({ errors }, { status: 422 });
   }
-  const records = await db.settings.findMany();
-  if(records.length > 0){
-    const settings = await db.settings.update({where: {id: records[0].id}, data});
-    return settings ?   redirect("/app/?saved=true") : redirect("/app/?saved=false");
-  }
-  const settings = await db.settings.create({data});
 
-  return settings ?   redirect("/app/?saved=true") : redirect("/app/?saved=false");
+  try {
+    const records = await db.settings.findMany();
+    if(records.length > 0){
+      const settings = await db.settings.update({where: {id: records[0].id}, data});
+    }else{
+      const settings = await db.settings.create({data});
+    }
+    const scriptContent = `
+     (function (w, d, s, l, g, i) {
+      w[l] = w[l] || []; w[l].push({ 'tag.start': new Date().getTime(), event: 'tag.js', id: i, ad: g });
+      var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'cibleclic_pt' ? '&l=' + l : ''; j.async = true;
+      j.src = 'https://' + i + '.userly.net/cl.js?id=' + i + '&ad=' + g + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'cibleclic_ptatest', ${data.advertiser_id}, ${data.offer_id});`;
+
+    // First, delete any existing script tags from your app
+    const existingScripts = await admin.rest.resources.ScriptTag.all({
+      session: session,
+    });
+
+    for (const script of existingScripts.data) {
+      await admin.rest.resources.ScriptTag.delete({
+        session: session,
+        id: script.id,
+      });
+    }
+
+    // Create new script tag
+    const scriptTag = new admin.rest.resources.ScriptTag({ session: session });
+    scriptTag.event = "onload";
+    scriptTag.src = `data:text/javascript,${encodeURIComponent(scriptContent)}`;
+    scriptTag.display_scope = "online_store";
+    await scriptTag.save();
+
+    return redirect("/app/?saved=true");
+  } catch (error) {
+    console.error("Error creating script tag:", error);
+    return redirect("/app/?saved=false");
+  }
+
+  //return settings ?   redirect("/app/?saved=true") : redirect("/app/?saved=false");
 }
 
 export default function Index() {

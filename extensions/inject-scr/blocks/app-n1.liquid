@@ -1,52 +1,89 @@
 <script>
-  {% if template == 'index' %}
-    var cibleclic_em = [{ page: 'homepage', email: '{{customer.email}}', gdpr_consentstring: '{{ shop.subscription_policy }}' }];
-  {% elsif template == 'product' %}
-     var cibleclic_pt=[{page:'product',email: '{{customer.email}}', productid: '{{ product.id }}', price: '{{ product.price }}', product_name: '{{ product.title }}', product_image: '{{ product.images }}', product_description:'{{ product.description }}'}];
-  {% elsif template == 'collection' %}
-    var cibleclic_pt=[{
-      page: 'listing',
-      email: '{{customer.email}}',
-      categoryid: '{{collection.id}}',
-      univers: '{{collection.all_types}}',
-      item: [
-        {% assign top_products = collection.products | limit: 3 %}
-        {% for product in top_products %}
-          "{{ product.id }}"{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-      ]
-    }];
+    var advertiser = {{ block.settings.advertiser }};
+    var offer = {{ block.settings.offer }};
+    {% if template == 'index' %}
+      var cibleclic_em = [{ page: 'homepage', email: '{{customer.email}}', gdpr_consentstring: '{{ shop.subscription_policy }}' }];
+    {% elsif template == 'product' %}
+       var cibleclic_pt=[{page:'product',email: '{{customer.email}}', productid: '{{ product.id }}', price: '{{ product.price }}', product_name: '{{ product.title }}', product_image: '{{ product.images }}', product_description:'{{ product.description }}'}];
+    {% elsif template == 'collection' %}
+      var cibleclic_pt=[{
+        page: 'listing',
+        email: '{{customer.email}}',
+        categoryid: '{{collection.id}}',
+        univers: '{{collection.all_types}}',
+        item: [
+          {% assign top_products = collection.products | limit: 3 %}
+          {% for product in top_products %}
+            "{{ product.id }}"{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ]
+      }];
 
-  {% elsif template == 'cart' %}
-     var cibleclic_pt=[{page: 'basket',email: '{{customer.email}}',
-  listprices:  [
-    {% assign items = cart.items %}
-    {% for item in items %}
-      "{{ item.price }}"{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  ],
-  listquantity: [
-    {% assign items = cart.items %}
-    {% for item in items %}
-      "{{ item.quantity }}"{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  ],
-  price: '{{cart.original_total_price}}',
-  listproducts:  [
-    {% assign items = cart.items %}
-    {% for item in items %}
-      "{{ item.id }}"{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  ]}];
+    {% elsif template == 'cart' %}
+       var cibleclic_pt=[{page: 'basket',email: '{{customer.email}}',
+    listprices:  [
+      {% assign items = cart.items %}
+      {% for item in items %}
+        "{{ item.price }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ],
+    listquantity: [
+      {% assign items = cart.items %}
+      {% for item in items %}
+        "{{ item.quantity }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ],
+    price: '{{cart.original_total_price}}',
+    listproducts:  [
+      {% assign items = cart.items %}
+      {% for item in items %}
+        "{{ item.id }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]}];
+  {% elsif template == 'checkout' %}
+      var cibleclic_pt=[{page: 'checkout',email: '{{customer.email}}',
+    listprices:  [
+      {% assign items = checkout.line_items %}
+      {% for item in items %}
+        "{{ item.price }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ],
+    listquantity: [
+      {% assign items = checkout.line_items %}
+      {% for item in items %}
+        "{{ item.quantity }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ],
+    price: '{{checkout.total_price}}',
+    listproducts:  [
+      {% assign items = checkout.line_items %}
+      {% for item in items %}
+        "{{ item.product_id }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]}];
   {% elsif template == 'customers/login' %}
-    var cibleclic_pt=[{page: 'inscription'}];
+      var cibleclic_pt=[{page: 'inscription'}];
   {% endif %}
 </script>
+
 {% schema %}
 {
   "name": "Page Variables",
-  "target": "body",
+  "target": "head",
   "javascript": "homepage.js",
-  "settings": []
+  "settings": [
+    {
+      "type": "number",
+      "id": "advertiser",
+      "label": "Advertiser id",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "offer",
+      "label": "offer id",
+      "default": 0
+    }
+  ]
 }
 {% endschema %}

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "f48bad1b6948bca8341d79115ff28000"
-application_url = "https://performer-luther-mw-string.trycloudflare.com"
+application_url = "https://profiles-advert-declare-distributed.trycloudflare.com"
 embedded = true
 name = "training-app"
 handle = "training-app-32"
@@ -23,9 +23,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://performer-luther-mw-string.trycloudflare.com/auth/callback",
-  "https://performer-luther-mw-string.trycloudflare.com/auth/shopify/callback",
-  "https://performer-luther-mw-string.trycloudflare.com/api/auth/callback"
+  "https://profiles-advert-declare-distributed.trycloudflare.com/auth/callback",
+  "https://profiles-advert-declare-distributed.trycloudflare.com/auth/shopify/callback",
+  "https://profiles-advert-declare-distributed.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
