@@ -15,7 +15,29 @@ import validateSettings from "../models/Script.server";
 import db from "../db.server";
 
 export async function loader({ request, params }) {
-  const { admin } = await authenticate.admin(request);
+  const { admin,session } = await authenticate.admin(request,{scopes: ['write_script_tags', 'read_script_tags','write_themes','read_themes']});
+
+  /* const response = await admin.graphql(
+    `#graphql
+  query MainTheme {
+    themes(role:"MAIN") {
+      edges {
+        node {
+          id
+          name
+          role
+          themeStoreId
+          processing
+          processingFailed
+        }
+      }
+    }
+  }`,
+  );
+
+  const data = await response.json();
+
+  console.log(data); */
 
   if (params.saved) {
    return Toast.show("Settings saved", { duration: 3000 });

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "f48bad1b6948bca8341d79115ff28000"
-application_url = "https://profiles-advert-declare-distributed.trycloudflare.com"
+application_url = "https://spencer-slight-use-oral.trycloudflare.com"
 embedded = true
 name = "training-app"
 handle = "training-app-32"
@@ -19,13 +19,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,write_themes,read_themes"
 
 [auth]
 redirect_urls = [
-  "https://profiles-advert-declare-distributed.trycloudflare.com/auth/callback",
-  "https://profiles-advert-declare-distributed.trycloudflare.com/auth/shopify/callback",
-  "https://profiles-advert-declare-distributed.trycloudflare.com/api/auth/callback"
+  "https://spencer-slight-use-oral.trycloudflare.com/auth/callback",
+  "https://spencer-slight-use-oral.trycloudflare.com/auth/shopify/callback",
+  "https://spencer-slight-use-oral.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
@@ -34,3 +34,4 @@ embedded = false
 [build]
 dev_store_url = "uzely-testing.myshopify.com"
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
