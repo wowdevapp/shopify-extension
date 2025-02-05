@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "f48bad1b6948bca8341d79115ff28000"
-application_url = "https://spencer-slight-use-oral.trycloudflare.com"
+application_url = "https://magnetic-walker-threats-su.trycloudflare.com"
 embedded = true
-name = "training-app"
+name = "uzerly-app"
 handle = "training-app-32"
 
 [webhooks]
@@ -19,13 +19,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_themes,read_themes"
+scopes = "write_products,write_themes,read_themes,read_customers,write_customers,unauthenticated_read_customers,unauthenticated_write_customers"
 
 [auth]
 redirect_urls = [
-  "https://spencer-slight-use-oral.trycloudflare.com/auth/callback",
-  "https://spencer-slight-use-oral.trycloudflare.com/auth/shopify/callback",
-  "https://spencer-slight-use-oral.trycloudflare.com/api/auth/callback"
+  "https://magnetic-walker-threats-su.trycloudflare.com/auth/callback",
+  "https://magnetic-walker-threats-su.trycloudflare.com/auth/shopify/callback",
+  "https://magnetic-walker-threats-su.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

@@ -1,4 +1,6 @@
-<script>
+<script
+  async
+>
     var advertiser = {{ block.settings.advertiser }};
     var offer = {{ block.settings.offer }};
     function getCookie(name) {
@@ -6,6 +8,7 @@
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
     }
+
 
     document.addEventListener('DOMContentLoaded', function () {
       // Access the settings
@@ -19,7 +22,6 @@
         const decodedCookie = decodeURIComponent(trackingConsentCookie);
         try {
           const consentData = JSON.parse(decodedCookie);
-          console.log('Parsed consent data:', consentData);
 
           // Check if the user has accepted cookies for specific purposes
           if (consentData.purposes) {

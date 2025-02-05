@@ -1,13 +1,15 @@
 import { json, redirect, useActionData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
 import {
   Layout,
-  Page,
-  TextField, BlockStack,
-  Text,
-  PageActions,
-  Toast,
+  Page, BlockStack,
+  Text, Toast,
   Banner,
-  Card
+  Card,
+  Link,
+  CalloutCard,
+  Box,
+  List,
+  InlineStack, Button
 } from "@shopify/polaris";
 import { useState } from "react";
 import { authenticate } from "../shopify.server";
@@ -135,68 +137,124 @@ export default function Index() {
 
 
   return (
-    <Page title="Add Offer Details">
+    <Page
+    title="Welcome to Userly Analytics"
+    primaryAction={
+      <>
+       <Button url="https://www.userly.net" external target="_blank">Get your credential</Button>
+      </>
+    }
+  >
+    <BlockStack gap="500">
+      {/* Welcome Banner */}
+      <Banner title="Thank you for choosing our application" status="success">
+        <p>Follow the steps below to start tracking your store's performance.</p>
+      </Banner>
+
       <Layout>
-      {saved && (
-          <Layout.Section>
-            <Banner
-              title="Settings saved"
-              status="success"
-              onDismiss={() => {
-                const params = new URLSearchParams(searchParams);
-                params.delete("saved");
-                submit(params);
-              }}
-            />
-          </Layout.Section>
-        )}
         <Layout.Section>
-          <Card title="Add Offer Details" sectioned>
-          <BlockStack gap="500">
-              <BlockStack gap="500">
-                <Text as={"h2"} variant="headingLg">
-                  Advertiser id
-                </Text>
-                <TextField
-                  id="Advertiser id"
-                  label="Advertiser id"
-                  labelHidden
-                  autoComplete="off"
-                  value={formState.advertiser_id}
-                  onChange={(advertiser_id) => setFormState({ ...formState, advertiser_id })}
-                  error={errors.advertiser_id}
-                  type="number"
-                />
-              </BlockStack>
-              <BlockStack gap="500" >
-                <Text as={"h2"} variant="headingLg">
-                  Offer id
-                </Text>
-                <TextField
-                  id="Offer id"
-                  label="Offer id"
-                  labelHidden
-                  autoComplete="off"
-                  value={formState.offer_id}
-                  onChange={(offer_id) => setFormState({ ...formState, offer_id })}
-                  error={errors.offer_id}
-                  type="number"
-                />
-              </BlockStack>
-          </BlockStack>
+          {/* Quick Setup Card */}
+          <CalloutCard
+            title="Quick Setup Guide"
+            illustration="https://cdn.shopify.com/s/assets/admin/checkout/settings-customizecart-705f57c725ac05be5a34ec20c05b94298cb8afd10aac7bd9c7ad02030f48cfa0.svg"
+            primaryAction={{
+              content: 'Get Your Credentials',
+              url: 'https://www.userly.net',
+              _target: 'blank',
+            }}
+          >
+            <BlockStack gap="400">
+              <Text as="p">
+                To enable tracking on your store, you'll need your unique credentials from the Userly dashboard.
+              </Text>
+            </BlockStack>
+          </CalloutCard>
+        </Layout.Section>
+
+        <Layout.Section secondary>
+          {/* Steps Card */}
+          <Card>
+            <BlockStack gap="400">
+              <Box padding="400">
+                <BlockStack gap="400">
+                  <Text variant="headingMd" as="h2">
+                    Setup Steps
+                  </Text>
+                  <List type="number">
+                    <List.Item>
+                      Log in to your Userly dashboard
+                    </List.Item>
+                    <List.Item>
+                      Navigate to Settings → API Credentials
+                    </List.Item>
+                    <List.Item>
+                      Copy your Advertiser and Offer IDs
+                    </List.Item>
+                    <List.Item>
+                      Paste them in the configuration below
+                    </List.Item>
+                  </List>
+                </BlockStack>
+              </Box>
+            </BlockStack>
           </Card>
         </Layout.Section>
+
         <Layout.Section>
-          <PageActions
-            primaryAction={{
-              content: "Save",
-              loading: isSaving,
-              disabled: !isDirty || isSaving,
-              onAction: handleSave,
-            }}
-          />
+          {/* Configuration Card */}
+          <Card>
+            <BlockStack gap="400">
+              <Box padding="400">
+                <BlockStack gap="400">
+                  <Text variant="headingMd" as="h2">
+                    Tracking Configuration
+                  </Text>
+
+                  <InlineStack gap="400" wrap={false}>
+                    <Text as="p">
+                      Need help finding your credentials? Check our{' '}
+                      <Link url="https://www.userly.net/docs" external>
+                        documentation
+                      </Link>
+                    </Text>
+                  </InlineStack>
+
+                  {/* Add your form components here */}
+                </BlockStack>
+              </Box>
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        {/* Help & Support Section */}
+        <Layout.Section>
+          <BlockStack gap="400">
+            <Card>
+              <BlockStack gap="400">
+                <Box padding="400">
+                  <BlockStack gap="400">
+                    <Text variant="headingMd" as="h2">
+                      Need Help?
+                    </Text>
+                    <InlineStack gap="400" align="space-around">
+                      <Button url="https://www.userly.net/support" external>
+                        Contact Support
+                      </Button>
+                      <Button url="https://www.userly.net/docs" external variant="plain">
+                        View Documentation
+                      </Button>
+                      <Button url="https://www.userly.net/faq" external variant="plain">
+                        FAQ
+                      </Button>
+                    </InlineStack>
+                  </BlockStack>
+                </Box>
+              </BlockStack>
+            </Card>
+          </BlockStack>
         </Layout.Section>
       </Layout>
-    </Page>
+    </BlockStack>
+  </Page>
   );
 }

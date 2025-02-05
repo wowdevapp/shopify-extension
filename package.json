@@ -1,5 +1,5 @@
 {
-  "name": "training-app",
+  "name": "uzerly-app",
   "private": true,
   "scripts": {
     "build": "remix vite:build",
