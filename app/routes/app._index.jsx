@@ -185,7 +185,7 @@ export default function Index() {
                       Log in to your Userly dashboard
                     </List.Item>
                     <List.Item>
-                      Navigate to Settings → API Credentials
+                      Navigate to Settings → offers
                     </List.Item>
                     <List.Item>
                       Copy your Advertiser and Offer IDs
@@ -207,8 +207,87 @@ export default function Index() {
               <Box padding="400">
                 <BlockStack gap="400">
                   <Text variant="headingMd" as="h2">
-                    Tracking Configuration
+                    Tracking Configuration on the theme page
                   </Text>
+
+                  <Box padding="400">
+                <BlockStack gap="400">
+                  <Text variant="headingMd" as="h2">
+                    Setup Steps
+                  </Text>
+                  <List type="number">
+                    <List.Item>
+                      go to online store → themes
+                    </List.Item>
+                    <List.Item>
+                      Click on Custumize
+                    </List.Item>
+                    <List.Item>
+                      on the left side click on app embed blocks
+                    </List.Item>
+                    <List.Item>
+                      Activate the Userly block = pages variables
+                    </List.Item>
+                    <List.Item>
+                      Add ids you get from our platform
+                    </List.Item>
+                  </List>
+                </BlockStack>
+              </Box>
+
+                  <InlineStack gap="400" wrap={false}>
+                    <Text as="p">
+                      Need help finding your credentials? Check our{' '}
+                      <Link url="https://www.userly.net/docs" external>
+                        documentation
+                      </Link>
+                    </Text>
+                  </InlineStack>
+
+                  {/* Add your form components here */}
+                </BlockStack>
+              </Box>
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          {/* Configuration Card */}
+          <Card>
+            <BlockStack gap="400">
+              <Box padding="400">
+                <BlockStack gap="400">
+                  <Text variant="headingMd" as="h2">
+                    Tracking Configuration on the Checkout thank you page
+                  </Text>
+
+                  <Box padding="400">
+                <BlockStack gap="400">
+                  <Text variant="headingMd" as="h2">
+                    Setup Steps
+                  </Text>
+                  <List type="number">
+                    <List.Item>
+                      go to settings
+                    </List.Item>
+                    <List.Item>
+                      Click on Checkout
+                    </List.Item>
+                    <List.Item>
+                      Click custumize
+                    </List.Item>
+                    <List.Item>
+                      click on apps
+                    </List.Item>
+                    <List.Item>
+                      Activate uzerly ext
+                    </List.Item>
+                    <List.Item>
+                      Add ids you get from our platform
+                    </List.Item>
+                  </List>
+                </BlockStack>
+              </Box>
 
                   <InlineStack gap="400" wrap={false}>
                     <Text as="p">
@@ -227,32 +306,6 @@ export default function Index() {
         </Layout.Section>
 
         {/* Help & Support Section */}
-        <Layout.Section>
-          <BlockStack gap="400">
-            <Card>
-              <BlockStack gap="400">
-                <Box padding="400">
-                  <BlockStack gap="400">
-                    <Text variant="headingMd" as="h2">
-                      Need Help?
-                    </Text>
-                    <InlineStack gap="400" align="space-around">
-                      <Button url="https://www.userly.net/support" external>
-                        Contact Support
-                      </Button>
-                      <Button url="https://www.userly.net/docs" external variant="plain">
-                        View Documentation
-                      </Button>
-                      <Button url="https://www.userly.net/faq" external variant="plain">
-                        FAQ
-                      </Button>
-                    </InlineStack>
-                  </BlockStack>
-                </Box>
-              </BlockStack>
-            </Card>
-          </BlockStack>
-        </Layout.Section>
       </Layout>
     </BlockStack>
   </Page>
