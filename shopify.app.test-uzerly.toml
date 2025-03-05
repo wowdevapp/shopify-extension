@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "98ed6e016cab84163ef46b87072b3f0f"
-application_url = "https://cubic-load-grand-waiver.trycloudflare.com"
+application_url = "https://moves-pioneer-licking-sega.trycloudflare.com"
 embedded = true
 name = "test-uzerly"
 handle = "test-uzerly"
@@ -20,9 +20,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://cubic-load-grand-waiver.trycloudflare.com/auth/callback",
-  "https://cubic-load-grand-waiver.trycloudflare.com/auth/shopify/callback",
-  "https://cubic-load-grand-waiver.trycloudflare.com/api/auth/callback"
+  "https://moves-pioneer-licking-sega.trycloudflare.com/auth/callback",
+  "https://moves-pioneer-licking-sega.trycloudflare.com/auth/shopify/callback",
+  "https://moves-pioneer-licking-sega.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

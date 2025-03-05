@@ -1,4 +1,4 @@
-import { json, redirect, useActionData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { json, useActionData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
 import {
   Layout,
   Page, BlockStack,
@@ -13,97 +13,95 @@ import {
 } from "@shopify/polaris";
 import { useState } from "react";
 import { authenticate } from "../shopify.server";
-import validateSettings from "../models/Script.server";
-import db from "../db.server";
 
 export async function loader({ request, params }) {
-  const { admin,session } = await authenticate.admin(request,{scopes: ['write_script_tags', 'read_script_tags','write_themes','read_themes']});
+  const { admin, session } = await authenticate.admin(request, {
+    scopes: ['write_script_tags', 'read_script_tags', 'write_themes', 'read_themes', 'write_pixels']
+  });
 
-  /* const response = await admin.graphql(
-    `#graphql
-  query MainTheme {
-    themes(role:"MAIN") {
-      edges {
-        node {
-          id
-          name
-          role
-          themeStoreId
-          processing
-          processingFailed
-        }
-      }
-    }
-  }`,
-  );
+  const url = new URL(request.url);
+  const pixelCreated = url.searchParams.get("pixelCreated");
+  const pixelError = url.searchParams.get("pixelError");
+  const saved = url.searchParams.get("saved");
 
-  const data = await response.json();
-
-  console.log(data); */
-
-  if (params.saved) {
-   return Toast.show("Settings saved", { duration: 3000 });
-  }else if(params.saved === false){
-    return Toast.show("Settings not saved", { duration: 3000 });
+  // Handle different status messages
+  if (pixelCreated === "true") {
+    return Toast.show("Web pixel created successfully", { duration: 3000 });
+  } else if (pixelError) {
+    return Toast.show(`Error creating web pixel: ${pixelError}`, { duration: 5000, isError: true });
+  } else if (saved === "true") {
+    return Toast.show("Settings saved", { duration: 3000 });
+  } else if (saved === "false") {
+    return Toast.show("Settings not saved", { duration: 3000, isError: true });
   }
 
-  return null
+  return null;
 }
 
 export async function action({ request ,params}) {
-  const { session ,admin } = await authenticate.admin(request);
-
-  const shop = session.shop;
-
-  /** @type {any} */
-  const data = {
-    ...Object.fromEntries(await request.formData()),
-  };
-  const errors =  validateSettings(data);
-  if (errors) {
-    return json({ errors }, { status: 422 });
-  }
+  const { admin, session } = await authenticate.admin(request, {
+    scopes: ['write_pixels']
+  });
 
   try {
-    const records = await db.settings.findMany();
-    if(records.length > 0){
-      const settings = await db.settings.update({where: {id: records[0].id}, data});
-    }else{
-      const settings = await db.settings.create({data});
-    }
-    const scriptContent = `
-     (function (w, d, s, l, g, i) {
-      w[l] = w[l] || []; w[l].push({ 'tag.start': new Date().getTime(), event: 'tag.js', id: i, ad: g });
-      var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'cibleclic_pt' ? '&l=' + l : ''; j.async = true;
-      j.src = 'https://' + i + '.userly.net/cl.js?id=' + i + '&ad=' + g + dl; f.parentNode.insertBefore(j, f);
-    })(window, document, 'script', 'cibleclic_ptatest', ${data.advertiser_id}, ${data.offer_id});`;
+    // Parse the request body
 
-    // First, delete any existing script tags from your app
-    const existingScripts = await admin.rest.resources.ScriptTag.all({
-      session: session,
+
+    // Create settings object for the pixel
+    const settings = {
+      accountID:943,
+      offerID: 2255
+    };
+
+    // Execute the GraphQL mutation to create the web pixel
+    const response = await admin.graphql(
+      `#graphql
+      mutation CreateWebPixel($input: WebPixelInput!) {
+        webPixelCreate(webPixel: $input) {
+          userErrors {
+            code
+            field
+            message
+          }
+          webPixel {
+            settings
+            id
+          }
+        }
+      }`,
+      {
+        variables: {
+          input: {
+            settings: JSON.stringify(settings)
+          }
+        }
+      }
+    );
+
+    const responseJson = await response.json();
+
+    // Check for errors
+    if (responseJson.data?.webPixelCreate?.userErrors?.length > 0) {
+      const errors = responseJson.data.webPixelCreate.userErrors;
+      return json({
+        success: false,
+        error: errors[0].message
+      }, { status: 400 });
+    }
+
+    // Return the created pixel data
+    return json({
+      success: true,
+      pixelId: responseJson.data?.webPixelCreate?.webPixel?.id,
+      settings: responseJson.data?.webPixelCreate?.webPixel?.settings
     });
-
-    for (const script of existingScripts.data) {
-      await admin.rest.resources.ScriptTag.delete({
-        session: session,
-        id: script.id,
-      });
-    }
-
-    // Create new script tag
-    const scriptTag = new admin.rest.resources.ScriptTag({ session: session });
-    scriptTag.event = "onload";
-    scriptTag.src = `data:text/javascript,${encodeURIComponent(scriptContent)}`;
-    scriptTag.display_scope = "online_store";
-    await scriptTag.save();
-
-    return redirect("/app/?saved=true");
   } catch (error) {
-    console.error("Error creating script tag:", error);
-    return redirect("/app/?saved=false");
+    console.error("Error creating web pixel:", error);
+    return json({
+      success: false,
+      error: error.message || "Failed to create web pixel"
+    }, { status: 500 });
   }
-
-  //return settings ?   redirect("/app/?saved=true") : redirect("/app/?saved=false");
 }
 
 export default function Index() {
@@ -134,6 +132,19 @@ export default function Index() {
     submit(data, { method: "post" });
 
   }
+
+
+  const handlePixelCreation = () => {
+    // Create form data to submit
+    const data = {
+      pixelAction: "create",
+      advertiser_id: 943,
+      offer_id: 2255,
+    };
+
+    // Use the useSubmit hook to submit the form
+    submit(data, { method: "post" });
+  };
 
 
   return (
@@ -306,6 +317,31 @@ export default function Index() {
         </Layout.Section>
 
         {/* Help & Support Section */}
+        <Layout.Section>
+  <Card>
+    <BlockStack gap="400">
+      <Box padding="400">
+        <BlockStack gap="400">
+          <Text variant="headingMd" as="h2">
+            Web Pixel Integration
+          </Text>
+          <Text as="p">
+            Create a web pixel to track user activity and conversions across your store.
+            This will allow you to measure the effectiveness of your marketing campaigns.
+          </Text>
+          <Button
+            onClick={handlePixelCreation}
+            loading={nav.state === "submitting" && nav.formData?.get("pixelCreation") === "true"}
+            primary
+          >
+            Create Web Pixel
+          </Button>
+        </BlockStack>
+      </Box>
+    </BlockStack>
+  </Card>
+</Layout.Section>
+
       </Layout>
     </BlockStack>
   </Page>
