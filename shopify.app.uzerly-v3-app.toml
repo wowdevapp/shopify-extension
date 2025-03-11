@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "48340d94d6bb1ab9e8668498eb0a8a5e"
+application_url = "https://revelation-activists-rational-stability.trycloudflare.com"
+embedded = true
+name = "uzerly-v3-app"
+handle = "uzerly-v3-app"
+
+[build]
+include_config_on_deploy = true
+dev_store_url = "t5698.myshopify.com"
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2025-01"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_pixels,read_customer_events"
+
+[auth]
+redirect_urls = [
+  "https://revelation-activists-rational-stability.trycloudflare.com/auth/callback",
+  "https://revelation-activists-rational-stability.trycloudflare.com/auth/shopify/callback",
+  "https://revelation-activists-rational-stability.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false

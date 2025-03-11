@@ -1,15 +1,12 @@
 import {
-  reactExtension, BlockStack, Text, View,
-  Heading,
-  Button, useStorage, useOrder,
-  useApi,
+  reactExtension, useApi,
   useSubscription
 } from "@shopify/ui-extensions-react/checkout";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 
 
-const orderDetailsBlock = reactExtension("purchase.checkout.footer.render-after", () => <OrderContent />);
-export { orderDetailsBlock };
+/* const orderDetailsBlock = reactExtension("purchase.checkout.footer.render-after", () => <OrderContent />);
+export { orderDetailsBlock }; */
 
 const thankYouBlock = reactExtension("purchase.thank-you.block.render", () => <Attribution />);
 export { thankYouBlock };
@@ -29,12 +26,7 @@ function Attribution() {
 
   useEffect(() => {
     if (orderId) {
-      fetch(`https://2255.userly.net/tcl.js?transactionid=${orderId}`,{
-        headers: {
-          'Content-Type': 'application/json',
-          'access-control-allow-origin': '*'
-        }
-      })
+      fetch(`https://2255.userly.net/tcl.js?transactionid=${orderId}`)
      }
     }, [orderId]);
 
@@ -43,7 +35,7 @@ function Attribution() {
     <></>
   );
 }
-
+/*
 function OrderContent(){
 
   const order = useOrder()
@@ -114,3 +106,4 @@ function useStorageState(key) {
 
   return [{data, loading}, setStorage]
 }
+ */

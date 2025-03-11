@@ -1,12 +1,8 @@
+name = "uzerly-web-pixel"
 type = "web_pixel_extension"
-name = "pixel"
-runtime_context = "strict"
 
-[customer_privacy]
-analytics = true
-marketing = true
-preferences = false
-sale_of_data = "enabled"
+
+runtime_context = "strict"
 
 [settings]
 type = "object"
