@@ -1,150 +1,53 @@
-import { json, useActionData, useNavigation, useSearchParams, useSubmit } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import {
   Layout,
   Page, BlockStack,
-  Text, Toast,
-  Banner,
+  Text, Banner,
   Card,
   Link,
   CalloutCard,
   Box,
   List,
-  InlineStack, Button
+  InlineStack, Button, Form, FormLayout, TextField
 } from "@shopify/polaris";
-import { useState } from "react";
 import { authenticate } from "../shopify.server";
 
+import { getWebPixels } from '../models/Script.server';
+import { useCallback, useState } from "react";
+
 export async function loader({ request, params }) {
-  const { admin, session } = await authenticate.admin(request, {
-    scopes: ['write_script_tags', 'read_script_tags', 'write_themes', 'read_themes', 'write_pixels']
-  });
-
-  const url = new URL(request.url);
-  const pixelCreated = url.searchParams.get("pixelCreated");
-  const pixelError = url.searchParams.get("pixelError");
-  const saved = url.searchParams.get("saved");
-
-  // Handle different status messages
-  if (pixelCreated === "true") {
-    return Toast.show("Web pixel created successfully", { duration: 3000 });
-  } else if (pixelError) {
-    return Toast.show(`Error creating web pixel: ${pixelError}`, { duration: 5000, isError: true });
-  } else if (saved === "true") {
-    return Toast.show("Settings saved", { duration: 3000 });
-  } else if (saved === "false") {
-    return Toast.show("Settings not saved", { duration: 3000, isError: true });
-  }
-
-  return null;
+  const { admin, session } = await authenticate.admin(request);
+  const {webPixel} = await getWebPixels(admin.graphql);
+  return webPixel
 }
 
 export async function action({ request ,params}) {
-  const { admin, session } = await authenticate.admin(request, {
-    scopes: ['write_pixels']
-  });
+  
 
-  try {
-    // Parse the request body
-
-
-    // Create settings object for the pixel
-    const settings = {
-      accountID:943,
-      offerID: 2255
-    };
-
-    // Execute the GraphQL mutation to create the web pixel
-    const response = await admin.graphql(
-      `#graphql
-      mutation CreateWebPixel($input: WebPixelInput!) {
-        webPixelCreate(webPixel: $input) {
-          userErrors {
-            code
-            field
-            message
-          }
-          webPixel {
-            settings
-            id
-          }
-        }
-      }`,
-      {
-        variables: {
-          input: {
-            settings: JSON.stringify(settings)
-          }
-        }
-      }
-    );
-
-    const responseJson = await response.json();
-
-    // Check for errors
-    if (responseJson.data?.webPixelCreate?.userErrors?.length > 0) {
-      const errors = responseJson.data.webPixelCreate.userErrors;
-      return json({
-        success: false,
-        error: errors[0].message
-      }, { status: 400 });
-    }
-
-    // Return the created pixel data
-    return json({
-      success: true,
-      pixelId: responseJson.data?.webPixelCreate?.webPixel?.id,
-      settings: responseJson.data?.webPixelCreate?.webPixel?.settings
-    });
-  } catch (error) {
-    console.error("Error creating web pixel:", error);
-    return json({
-      success: false,
-      error: error.message || "Failed to create web pixel"
-    }, { status: 500 });
-  }
+  
 }
 
 export default function Index() {
   //const qrCode = useLoaderData();
+    const webPixel  = useLoaderData();
 
-  const [searchParams] = useSearchParams();
-  const saved = searchParams.get("saved");
+    const {settings} = webPixel
 
-  const errors = useActionData()?.errors || {};
-  const [formState, setFormState] = useState({
-    advertiser_id: "",
-    offer_id: "",
-  });
-  const [cleanFormState, setCleanFormState] = useState({});
-  const isDirty = JSON.stringify(formState) !== JSON.stringify(cleanFormState);
+    const parsedSettings = JSON.parse(settings);
 
-  const nav = useNavigation();
-  const isSaving = nav.state === "submitting";
-
-    const submit = useSubmit();
-  function handleSave() {
-    const data = {
-      advertiser_id: Number(formState.advertiser_id) ,
-      offer_id: Number(formState.offer_id),
-    };
-
-    setCleanFormState({ ...formState });
-    submit(data, { method: "post" });
-
-  }
+    const [advertiser, setAdvertiser] = useState(parsedSettings?.advertiser);
+    const [offer, setOffer] = useState(parsedSettings?.offer);
 
 
-  const handlePixelCreation = () => {
-    // Create form data to submit
-    const data = {
-      pixelAction: "create",
-      advertiser_id: 943,
-      offer_id: 2255,
-    };
 
-    // Use the useSubmit hook to submit the form
-    submit(data, { method: "post" });
-  };
+    const handleAdvertiserChange = useCallback(
+      (value) => setAdvertiser(value),
+    [],
+    )
+
+    const handleOfferChange = useCallback(
+      (value) => setOffer(value),[]
+    )
 
 
   return (
@@ -329,13 +232,35 @@ export default function Index() {
             Create a web pixel to track user activity and conversions across your store.
             This will allow you to measure the effectiveness of your marketing campaigns.
           </Text>
-          <Button
-            onClick={handlePixelCreation}
-            loading={nav.state === "submitting" && nav.formData?.get("pixelCreation") === "true"}
-            primary
-          >
-            Create Web Pixel
-          </Button>
+          <Form onSubmit={()=>{}}>
+      <FormLayout>
+        <TextField
+          value={advertiser}
+          onChange={handleAdvertiserChange}
+          label="advertiser"
+          type="number"
+          autoComplete="Advertiser"
+          helpText={
+            <span>
+              We’ll use this id as your advertiser id on the web pixel
+            </span>
+          }
+        />
+        <TextField
+          value={offer}
+          onChange={handleOfferChange}
+          label="offer"
+          type="number"
+          autoComplete="Offer"
+          helpText={
+            <span>
+              We’ll use this id as your offer id on the web pixel
+            </span>
+          }
+        />
+        <Button submit>{(advertiser && offer) ? 'Update web pixel' : 'Create web pixel'}</Button>
+      </FormLayout>
+    </Form>
         </BlockStack>
       </Box>
     </BlockStack>

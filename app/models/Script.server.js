@@ -1,14 +1,17 @@
-// models/Script.server.js
-export default function validateSettings(data) {
-  console.log(data.advertiser_id, "data ==========");
-  const errors = {};
+export async function getWebPixels(graphql) {
+  const response = await graphql(
+    `query {
+      webPixel {
+        id
+        settings
+      }
+    }
+    `
+  );
 
-  if (!data.advertiser_id) {
-    errors.advertiser_id = "Advertiser ID is required";
-  }
-  if (!data.offer_id) {
-    errors.offer_id = "Offer ID is required";
-  }
+  const {
+    data
+  } = await response.json();
 
-  return Object.keys(errors).length > 0 ? errors : null;
+  return data
 }
