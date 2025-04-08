@@ -1,4 +1,4 @@
-import { useLoaderData } from "@remix-run/react";
+import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import {
   Layout,
   Page, BlockStack,
@@ -8,35 +8,203 @@ import {
   CalloutCard,
   Box,
   List,
-  InlineStack, Button, Form, FormLayout, TextField
+  InlineStack, Button, Form, FormLayout, TextField,
+  ButtonGroup
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 
 import { getWebPixels } from '../models/Script.server';
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { json } from "stream/consumers";
 
 export async function loader({ request, params }) {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request);
   const {webPixel} = await getWebPixels(admin.graphql);
-  return webPixel
+  return webPixel || false;
 }
 
 export async function action({ request ,params}) {
-  
 
-  
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  const pixelId = formData.get("pixelId");
+  const { admin } = await authenticate.admin(request);
+
+  if (intent === "delete" && pixelId) {
+    try {
+      // Execute GraphQL mutation to delete the web pixel
+      const response = await admin.graphql(`
+        mutation webPixelDelete($id: ID!) {
+  webPixelDelete(id: $id) {
+    deletedWebPixelId
+    userErrors {
+      field
+      message
+    }
+  }
+}`,
+        {
+          variables: {
+            id: pixelId, // Make sure this is the full ID including the prefix if needed
+          },
+        }
+      );
+
+      const {data} = await response.json();
+      return {
+        success: data.webPixelDelete.userErrors.length === 0,
+        errors: data.webPixelDelete.userErrors,
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      return json({ success: false, error: "Failed to delete web pixel" }, { status: 500 });
+    }
+  }
+
+  else if (intent === "add") {
+    try {
+      const advertiser = JSON.parse(formData.get("advertiser"));
+      const offer = JSON.parse(formData.get("offer"));
+
+      // Execute GraphQL mutation to create a new pixel
+      const response = await admin.graphql(
+        `#graphql
+        mutation webPixelCreate($webPixel: WebPixelInput!) {
+          webPixelCreate(webPixel: $webPixel) {
+            userErrors {
+              field
+              message
+              code
+            }
+            webPixel {
+              id
+              settings
+            }
+          }
+        }`,
+        {
+          variables: {
+            "webPixel": {
+              "settings": `{\"advertiser\":\"${advertiser}\",\"offer\":\"${offer}\"}`
+            }
+          },
+        },
+
+      );
+
+    const {data} = await response.json();
+
+     return {
+      success: data.webPixelCreate.userErrors.length === 0,
+      pixel: data.webPixelCreate.webPixel,
+      errors: data.webPixelCreate.userErrors
+    };
+
+    } catch (error) {
+      console.error("Add error:", error);
+      return json({ success: false, error: "Failed to create pixel" }, { status: 500 });
+    }
+  }
+
+  // Handle update operation
+  else if (intent === "update") {
+    try {
+      const id = formData.get("id");
+      const advertiser = JSON.parse(formData.get("advertiser"));
+      const offer = JSON.parse(formData.get("offer"));
+
+
+      // Execute GraphQL mutation to update an existing pixel
+      const response = await admin.graphql(`
+        mutation webPixelUpdate($id: ID!, $webPixel: WebPixelInput!) {
+  webPixelUpdate(id: $id, webPixel: $webPixel) {
+    userErrors {
+      field
+      message
+    }
+    webPixel {
+      id
+      settings
+    }
+  }
+}`,
+        {
+          variables: {
+            id: `${id}`,
+            "webPixel": {
+              "settings": `{\"advertiser\":\"${advertiser}\",\"offer\":\"${offer}\"}`
+            }
+          },
+        }
+      );
+
+      const {data} = await response.json();
+
+      return{
+        success: data.webPixelUpdate.userErrors.length === 0,
+        pixel: data.webPixelUpdate.webPixel,
+        errors: data.webPixelUpdate.userErrors
+      }
+    } catch (error) {
+      return json({ success: false, error: "Failed to update pixel" }, { status: 500 });
+    }
+  }
+
+  return json({ success: false, error: "Invalid action" }, { status: 400 });
 }
+
+
 
 export default function Index() {
   //const qrCode = useLoaderData();
     const webPixel  = useLoaderData();
+    const submit = useSubmit();
+    console.log('webPixel', webPixel);
 
-    const {settings} = webPixel
+    const actionData = useActionData();
 
-    const parsedSettings = JSON.parse(settings);
+    console.log('actionData', actionData);
+
+    const settings = webPixel?.settings || '{}';
+
+    const parsedSettings = JSON.parse(settings) || {};
 
     const [advertiser, setAdvertiser] = useState(parsedSettings?.advertiser);
     const [offer, setOffer] = useState(parsedSettings?.offer);
+
+    // State for showing the success/error message
+  const [showMessage, setShowMessage] = useState(false);
+  const [messageStatus, setMessageStatus] = useState("info");
+  const [messageContent, setMessageContent] = useState("");
+
+    useEffect(() => {
+      if (actionData) {
+        setShowMessage(true);
+
+        if (actionData.success) {
+          setMessageStatus("success");
+          setMessageContent(
+            actionData.message ||
+            (webPixel ? "Web pixel updated successfully" : "Web pixel created successfully")
+          );
+        } else {
+          setMessageStatus("critical");
+          setMessageContent(
+            actionData.error ||
+            (actionData.errors && actionData.errors.length > 0
+              ? actionData.errors[0].message
+              : "An error occurred")
+          );
+        }
+
+        // Auto-hide message after 5 seconds
+        const timer = setTimeout(() => {
+          setShowMessage(false);
+        }, 5000);
+
+        return () => clearTimeout(timer);
+      }
+    }, [actionData, webPixel]);
 
 
 
@@ -48,6 +216,31 @@ export default function Index() {
     const handleOfferChange = useCallback(
       (value) => setOffer(value),[]
     )
+
+    const handleDelete = useCallback(() => {
+      if (confirm(`Are you sure you want to delete pixel ${webPixel.id}?`)) {
+        const formData = new FormData();
+        formData.append("intent", "delete");
+        formData.append("pixelId", webPixel.id);
+        submit(formData, { method: "post" });
+      }
+    }, []);
+
+    const handleSave = () => {
+
+
+      const data = {
+        advertiser,
+        offer,
+        intent: webPixel ? "update" : "add"
+      };
+
+      if (webPixel) {
+        data.id = webPixel.id;
+      }
+
+      submit(data, { method: "post" });
+    }
 
 
   return (
@@ -225,6 +418,15 @@ export default function Index() {
     <BlockStack gap="400">
       <Box padding="400">
         <BlockStack gap="400">
+        {showMessage && (
+          <Banner
+            title={messageStatus === "success" ? "Success" : "Error"}
+            status={messageStatus}
+            onDismiss={() => setShowMessage(false)}
+          >
+            <p>{messageContent}</p>
+          </Banner>
+        )}
           <Text variant="headingMd" as="h2">
             Web Pixel Integration
           </Text>
@@ -258,7 +460,11 @@ export default function Index() {
             </span>
           }
         />
-        <Button submit>{(advertiser && offer) ? 'Update web pixel' : 'Create web pixel'}</Button>
+
+        <ButtonGroup>
+        <Button onClick={handleSave}>{ webPixel  ? 'Update' : 'Add'}</Button>
+        <Button disabled={!webPixel} onClick={handleDelete} tone="critical">Delete</Button>
+    </ButtonGroup>
       </FormLayout>
     </Form>
         </BlockStack>
