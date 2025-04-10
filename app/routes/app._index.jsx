@@ -54,6 +54,7 @@ export async function action({ request ,params}) {
       return {
         success: data.webPixelDelete.userErrors.length === 0,
         errors: data.webPixelDelete.userErrors,
+        isDelete:true
       }
     } catch (error) {
       console.error("Delete error:", error);
@@ -97,7 +98,9 @@ export async function action({ request ,params}) {
      return {
       success: data.webPixelCreate.userErrors.length === 0,
       pixel: data.webPixelCreate.webPixel,
-      errors: data.webPixelCreate.userErrors
+      errors: data.webPixelCreate.userErrors,
+      message:'Web pixel created successfully',
+      isAdd: true,
     };
 
     } catch (error) {
@@ -143,7 +146,9 @@ export async function action({ request ,params}) {
       return{
         success: data.webPixelUpdate.userErrors.length === 0,
         pixel: data.webPixelUpdate.webPixel,
-        errors: data.webPixelUpdate.userErrors
+        errors: data.webPixelUpdate.userErrors,
+        message:'Web pixel updated successfully',
+        isUpdate: true
       }
     } catch (error) {
       return json({ success: false, error: "Failed to update pixel" }, { status: 500 });
@@ -157,7 +162,8 @@ export async function action({ request ,params}) {
 
 export default function Index() {
   //const qrCode = useLoaderData();
-    const webPixel  = useLoaderData();
+  const initialWebPixel = useLoaderData();
+  const [webPixel, setWebPixel] = useState(initialWebPixel);
     const submit = useSubmit();
     console.log('webPixel', webPixel);
 
@@ -177,34 +183,74 @@ export default function Index() {
   const [messageStatus, setMessageStatus] = useState("info");
   const [messageContent, setMessageContent] = useState("");
 
-    useEffect(() => {
-      if (actionData) {
-        setShowMessage(true);
 
-        if (actionData.success) {
-          setMessageStatus("success");
-          setMessageContent(
-            actionData.message ||
-            (webPixel ? "Web pixel updated successfully" : "Web pixel created successfully")
-          );
-        } else {
-          setMessageStatus("critical");
-          setMessageContent(
-            actionData.error ||
-            (actionData.errors && actionData.errors.length > 0
-              ? actionData.errors[0].message
-              : "An error occurred")
-          );
-        }
-
-        // Auto-hide message after 5 seconds
-        const timer = setTimeout(() => {
-          setShowMessage(false);
-        }, 5000);
-
-        return () => clearTimeout(timer);
+  useEffect(() => {
+    if (initialWebPixel) {
+      setWebPixel(initialWebPixel);
+      try {
+        const settings = initialWebPixel.settings || '{}';
+        const parsedSettings = JSON.parse(settings) || {};
+        setAdvertiser(parsedSettings.advertiser);
+        setOffer(parsedSettings.offer);
+      } catch (error) {
+        console.error("Error parsing settings:", error);
       }
-    }, [actionData, webPixel]);
+    } else {
+      setWebPixel(false);
+      setAdvertiser('');
+      setOffer('');
+    }
+  }, [initialWebPixel]);
+
+      // Effect to handle action data updates including new pixel creation
+  useEffect(() => {
+    if (actionData) {
+      setShowMessage(true);
+
+      if (actionData.success) {
+        setMessageStatus("success");
+        setMessageContent(
+          actionData.message || 'Operation completed successfully'
+        );
+
+        // If delete operation was successful, reset the form fields and webPixel
+        if (actionData.isDelete) {
+          setAdvertiser('');
+          setOffer('');
+          setWebPixel(false);
+        }
+        // If add or update operation was successful, update the webPixel state
+        else if (actionData.isAdd || actionData.isUpdate) {
+          if (actionData.pixel) {
+            setWebPixel(actionData.pixel);
+            try {
+              const settings = actionData.pixel.settings || '{}';
+              const parsedSettings = JSON.parse(settings) || {};
+              setAdvertiser(parsedSettings.advertiser);
+              setOffer(parsedSettings.offer);
+            } catch (error) {
+              console.error("Error parsing settings:", error);
+            }
+          }
+        }
+      } else {
+        setMessageStatus("critical");
+        setMessageContent(
+          actionData.error ||
+          (actionData.errors && actionData.errors.length > 0
+            ? actionData.errors[0].message
+            : "An error occurred")
+        );
+      }
+
+      // Auto-hide message after 5 seconds
+      const timer = setTimeout(() => {
+        setShowMessage(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [actionData]);
 
 
 
@@ -224,7 +270,7 @@ export default function Index() {
         formData.append("pixelId", webPixel.id);
         submit(formData, { method: "post" });
       }
-    }, []);
+    }, [submit, webPixel.id]);
 
     const handleSave = () => {
 
@@ -461,10 +507,15 @@ export default function Index() {
           }
         />
 
-        <ButtonGroup>
-        <Button onClick={handleSave}>{ webPixel  ? 'Update' : 'Add'}</Button>
-        <Button disabled={!webPixel} onClick={handleDelete} tone="critical">Delete</Button>
-    </ButtonGroup>
+
+        {
+          advertiser && offer && (
+            <ButtonGroup>
+                <Button onClick={handleSave}>{ webPixel  ? 'Update' : 'Add'}</Button>
+                <Button disabled={!webPixel} onClick={handleDelete} tone="critical">Delete</Button>
+            </ButtonGroup>
+          )
+        }
       </FormLayout>
     </Form>
         </BlockStack>

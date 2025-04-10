@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "48340d94d6bb1ab9e8668498eb0a8a5e"
-application_url = "https://misc-bd-mortality-colombia.trycloudflare.com"
+application_url = "https://contains-sperm-bias-retail.trycloudflare.com"
 embedded = true
 name = "uzerly-v3-app"
 handle = "uzerly-v3-app"
@@ -20,9 +20,9 @@ scopes = "write_pixels,read_customer_events"
 
 [auth]
 redirect_urls = [
-  "https://misc-bd-mortality-colombia.trycloudflare.com/auth/callback",
-  "https://misc-bd-mortality-colombia.trycloudflare.com/auth/shopify/callback",
-  "https://misc-bd-mortality-colombia.trycloudflare.com/api/auth/callback"
+  "https://contains-sperm-bias-retail.trycloudflare.com/auth/callback",
+  "https://contains-sperm-bias-retail.trycloudflare.com/auth/shopify/callback",
+  "https://contains-sperm-bias-retail.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
