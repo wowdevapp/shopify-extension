@@ -313,7 +313,8 @@ export default function Index() {
             primaryAction={{
               content: 'Get Your Credentials',
               url: 'https://www.userly.net',
-              _target: 'blank',
+              target: '_blank',
+              external: true,
             }}
           >
             <BlockStack gap="400">
@@ -403,62 +404,6 @@ export default function Index() {
             </BlockStack>
           </Card>
         </Layout.Section>
-
-        <Layout.Section>
-          {/* Configuration Card */}
-          <Card>
-            <BlockStack gap="400">
-              <Box padding="400">
-                <BlockStack gap="400">
-                  <Text variant="headingMd" as="h2">
-                    Tracking Configuration on the Checkout thank you page
-                  </Text>
-
-                  <Box padding="400">
-                <BlockStack gap="400">
-                  <Text variant="headingMd" as="h2">
-                    Setup Steps
-                  </Text>
-                  <List type="number">
-                    <List.Item>
-                      go to settings
-                    </List.Item>
-                    <List.Item>
-                      Click on Checkout
-                    </List.Item>
-                    <List.Item>
-                      Click custumize
-                    </List.Item>
-                    <List.Item>
-                      click on apps
-                    </List.Item>
-                    <List.Item>
-                      Activate uzerly ext
-                    </List.Item>
-                    <List.Item>
-                      Add ids you get from our platform
-                    </List.Item>
-                  </List>
-                </BlockStack>
-              </Box>
-
-                  <InlineStack gap="400" wrap={false}>
-                    <Text as="p">
-                      Need help finding your credentials? Check our{' '}
-                      <Link url="https://www.userly.net/docs" external>
-                        documentation
-                      </Link>
-                    </Text>
-                  </InlineStack>
-
-                  {/* Add your form components here */}
-                </BlockStack>
-              </Box>
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-
-        {/* Help & Support Section */}
         <Layout.Section>
   <Card>
     <BlockStack gap="400">
